@@ -79,7 +79,7 @@ dfformatdatefull["date"]= pd.to_datetime(dfformatdatefull["date"],format='%Y-%m-
 #dfformatdatefull = dfformatdatefull[dfformatdatefull < pd.to_datetime('2018-12-31')]# filter a priori dates in the future 
                                                                   # (this should be solved elsewhere, when merging the data, before dumping the final dataframe) 
 
-print dfformatdatefull['AntennaName'].unique()
+#print dfformatdatefull['AntennaName'].unique()
 
 # format also Fangst.dato on which they want custom filtering too
 dfformatdatefull["Fangst.dato"]= pd.to_datetime(dfformatdatefull["Fangst.dato"], errors='coerce')#, format='%Y-%m-%d %H:%M:%S')
@@ -150,6 +150,7 @@ dfformatdatefullBolstadBunnM = dfformatdatefull[dfformatdatefull['AntennaName']=
 dfformatdatefullBjoreioFlyte = dfformatdatefull[dfformatdatefull['AntennaName']==u'BjoreioFlyte']
 dfformatdatefullBjoreioBunn = dfformatdatefull[dfformatdatefull['AntennaName']==u'BjoreioBunn']
 dfformatdatefullArnaBunn = dfformatdatefull[dfformatdatefull['AntennaName']==u'ArnaBunn']
+dfformatdatefullArnaVerkstedBunn = dfformatdatefull[dfformatdatefull['AntennaName']==u'ArnaVerkstedBunn']
 dfformatdatefullApeltunVannetRamme = dfformatdatefull[dfformatdatefull['AntennaName']==u'ApeltunVannetRamme']
 dfformatdatefullApeltunS = dfformatdatefull[dfformatdatefull['AntennaName']==u'ApeltunS']
 dfformatdatefullApeltunFToppeRamme = dfformatdatefull[dfformatdatefull['AntennaName']==u'ApeltunFToppeRamme']
@@ -164,7 +165,7 @@ dfformatdatefullArdalSchmidtholenBunn = dfformatdatefull[dfformatdatefull['Anten
 
 antennaedict = {'ApeltunA1':dfformatdatefullApeltunA1,'ApeltunA2':dfformatdatefullApeltunA2,'ApeltunA3':dfformatdatefullApeltunA3,'ApeltunA4':dfformatdatefullApeltunA4,
 'ApeltunFTnedeRamme':dfformatdatefullApeltunFTnedeRamme,'ApeltunFToppeRamme':dfformatdatefullApeltunFToppeRamme,'ApeltunS':dfformatdatefullApeltunS,'ApeltunVannetRamme':dfformatdatefullApeltunVannetRamme,
-'ArnaBunn':dfformatdatefullArnaBunn,'BjoreioBunn':dfformatdatefullBjoreioBunn,'BjoreioFlyte':dfformatdatefullBjoreioFlyte,'BolstadBunnM':dfformatdatefullBolstadBunnM,
+'ArnaBunn':dfformatdatefullArnaBunn,'ArnaVerkstedBunn':dfformatdatefullArnaVerkstedBunn,'BjoreioBunn':dfformatdatefullBjoreioBunn,'BjoreioFlyte':dfformatdatefullBjoreioFlyte,'BolstadBunnM':dfformatdatefullBolstadBunnM,
 'BolstadBunnS1':dfformatdatefullBolstadBunnS1,'BolstadBunnS2':dfformatdatefullBolstadBunnS2,'BolstadFlyteM':dfformatdatefullBolstadFlyteM,'BolstadFlyteS':dfformatdatefullBolstadFlyteS,
 'DaleRevebruaBunn':dfformatdatefullDaleRevebruaBunn,'DaleelvBunnM':dfformatdatefullDaleelvBunnM,'DaleelvBunnS1':dfformatdatefullDaleelvBunnS1,'DaleelvBunnS2':dfformatdatefullDaleelvBunnS2,
 'DalemunningBunn':dfformatdatefullDalemunningBunn,'DalevågenBunn':dfformatdatefullDalevagenBunn,'DalevågenBunnM':dfformatdatefullDalevagenBunnM,'DalevågenBunnS':dfformatdatefullDalevagenBunnS,
@@ -299,11 +300,13 @@ def generate_callback(antennaname):
     def update_graph_antenna(selected_arter,selected_column, yaxis_type,retain_data, max_date, min_date):
 
         dfdatefull = get_arter_antenna(selected_arter,antennaname)
+
+        dfdatefull = dfdatefull.sort_values('date')
     
         #--------------------------------------------------------------------------
         # filter to remove duplicated PIT.IDs and retain only the FIRST recording
         if (retain_data!='keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)'):
-            dfdatefull = dfdatefull.drop_duplicates(subset='PIT.ID', keep="first")
+            dfdatefull = dfdatefull.drop_duplicates(subset=['PIT.ID','Year'], keep="first")
         #---------------------------------------------------------------------------
 
         min_date = pd.to_datetime(min_date)
@@ -380,7 +383,7 @@ app.config.supress_callback_exceptions=True
 appcolors = {
     'background': '#fff',
     'text': '#333',
-    'grey': '#F5F5F5',
+    'grey': '#b7b7b7',
 }
 
 myfont = "Cabin"
@@ -389,10 +392,13 @@ fancyfont = "Days One"#"Righteous"#"Bungee Inline"#"Orbitron" #Fredoka One # Mon
 
 #image_filename_banner = 'salmon-opaque.png'
 #encoded_image_banner = base64.b64encode(open(image_filename_banner, 'rb').read())
-image_filename = 'UniLogoVisRgb-transp-resized.png' # replace with your own image
+image_filename = 'UniLogoVisRgb-transp-resized-grayscale.png' # replace with your own image
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
-image_filename2 = 'norcelogo-resized.png'
+image_filename2 = 'norcelogo-resized-grayscale.png'
 encoded_image2 = base64.b64encode(open(image_filename2, 'rb').read())
+
+image_filename3 = 'cropped-resized-all-filter-opaque-dithered.png'
+encoded_image3 = base64.b64encode(open(image_filename3, 'rb').read())
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -412,7 +418,10 @@ base_page = html.Div(children=[
             #html.Div('PIT-tag repings visualizations for you guys!',style={'textAlign': 'center','color': appcolors['text'],'font-family': fancyfont}),
         ]),
     #],style={'background-image': 'url("https://raw.githubusercontent.com/carlottanegri/PIT-TAG-database/master/salmon-opaque.png"),url()', # hosting of the file must be changed
-    ],style={'background-image': 'url("https://github.com/ciphercharly/PIT-tag/blob/master/salmon-opaque.png"),url()', 
+    #],style={'background-image': 'url("https://raw.githubusercontent.com/ciphercharly/PIT-tag/master/salmon-dithered-cropped-2-opaque7.png"),url()', 
+    ],style={'background-image': 'url("https://raw.githubusercontent.com/ciphercharly/PIT-tag/master/cropped22-resized2-all-dithered-opaque7.png"),url()', 
+             'background-size':'contain',
+#             'background-repeat':'no-repeat',
              'height': '300px',
              'display': 'flex',
              'align-items': 'center',
@@ -421,7 +430,25 @@ base_page = html.Div(children=[
              }
     ),
 
+    #html.Div([
+    #    html.H1([
+    #        html.Div('Fjord-Wizard',style={'textAlign': 'center', 'color': appcolors['text'], 'font-family': fancyfont,'font-size':'12rem'}),
+    #        #html.Div(html.Img(src='data:image/png;base64,{}'.format(encoded_image)),style={'float':'right','width': '15%','padding':'10px','display':'inline-block'}),
+    #        #html.Div('FJORD-WIZARD',style={'textAlign': 'center', 'color': appcolors['text'], 'font-family': fancyfont,'font-size':'12rem'}),
+    #        #html.Div('PIT-tag repings visualizations for you guys!',style={'textAlign': 'center','color': appcolors['text'],'font-family': fancyfont}),
+    #    ]),
+    #],style={'display': 'flex',
+    #         'align-items': 'center',
+    #         'justify-content': 'center',
+    #         'padding':'10px'
+    #         }
+    #),
+
+
     ##html.Img(src='https://raw.githubusercontent.com/carlottanegri/PIT-TAG-database/master/fish.png'),
+    #html.Div([
+    #    html.Img(src='data:image/png;base64,{}'.format(encoded_image3),style={'width': '100%','display':'flex'}),
+    #]),
     
    
     html.Div([
@@ -527,7 +554,7 @@ base_page = html.Div(children=[
         html.Div([
             dcc.RadioItems(
                 id='retain-data-3',
-                options=[{'label': i, 'value': i} for i in ['keep only the earliest reping for each PIT.ID (later repings won\'t show up)', 'keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)'] ],
+                options=[{'label': i, 'value': i} for i in ['keep only the earliest reping for each PIT.ID for each year (later repings won\'t show up)', 'keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)'] ],
                 value='keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)',
                 #labelStyle={'display': 'inline-block'}
             ),
@@ -806,7 +833,7 @@ page_2_layout = html.Div(children=[
         html.Div([
             dcc.RadioItems(
                 id='retain-data-p2',
-                options=[{'label': i, 'value': i} for i in ['keep only the earliest reping for each PIT.ID (later repings won\'t show up)', 'keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)'] ],
+                options=[{'label': i, 'value': i} for i in ['keep only the earliest reping for each PIT.ID for each year(later repings won\'t show up)', 'keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)'] ],
                 value='keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)',
                 #labelStyle={'display': 'inline-block'}
             ),
@@ -1095,11 +1122,13 @@ def update_antennas_dropdown_value(selectedarter,selectedvassdrag):
 def update_graph_3(selected_arter,selected_vassdrag,selected_column, antennas_list, yaxis_type, retain_data, max_date, min_date):
 
     dfdatefull = get_arter_vassdrag(selected_arter,selected_vassdrag)
-    
+
+    dfdatefull = dfdatefull.sort_values('date')
+
     #--------------------------------------------------------------------------
     # filter to remove duplicated PIT.IDs and retain only the FIRST recording
     if (retain_data!='keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)'):
-        dfdatefull = dfdatefull.drop_duplicates(subset='PIT.ID', keep="first")
+        dfdatefull = dfdatefull.drop_duplicates(subset=['PIT.ID','Year'], keep="first")
     #---------------------------------------------------------------------------
 
     min_date = pd.to_datetime(min_date)
@@ -1131,7 +1160,7 @@ def update_graph_3(selected_arter,selected_vassdrag,selected_column, antennas_li
         #print groupbyselectedcol 
         unstacked = finaldf.groupby(["date",selected_column])['PIT.ID'].agg(lambda x:len(x.unique())).unstack().reset_index()
 
-        cmap = plt.cm.get_cmap('gist_rainbow', groupbyselectedcol.shape[0]) 
+        cmap = plt.cm.get_cmap('rainbow', groupbyselectedcol.shape[0]) 
         colors = []
         for i in range(cmap.N):
             rgb = cmap(i)[:3] # will return rgba, we take only first 3 so we get rgb
@@ -1233,13 +1262,15 @@ def update_graph_1(selected_arter,selected_vassdrag, selected_column, antennas_l
     #dfdatefull = dfformatdatefull[dfformatdatefull["Arter"]==selected_arter]
     dfdatefull = get_arter_vassdrag(selected_arter,selected_vassdrag)
 
+    dfdatefull = dfdatefull.sort_values('date')
+
     #print selected_column, filter_list
     #print selected_column, antennas_list
 
     #--------------------------------------------------------------------------
     # filter to remove duplicated PIT.IDs and retain only the FIRST recording
     if (retain_data)!='keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)':
-        dfdatefull = dfdatefull.drop_duplicates(subset='PIT.ID', keep="first")
+        dfdatefull = dfdatefull.drop_duplicates(subset=['PIT.ID','Year'], keep="first")
     #---------------------------------------------------------------------------
 
     #filter both ping and marking dates
@@ -1290,7 +1321,7 @@ def update_graph_1(selected_arter,selected_vassdrag, selected_column, antennas_l
         # fill the NaN, necessary to display proper cumulative sum
         unstacked = unstacked.fillna(0)
 
-        cmap = plt.cm.get_cmap('rainbow', groupbyselectedcol.shape[0]) 
+        cmap = plt.cm.get_cmap('gist_rainbow', groupbyselectedcol.shape[0]) 
         colors = []
         for i in range(cmap.N):
             rgb = cmap(i)[:3] # will return rgba, we take only first 3 so we get rgb
@@ -1354,6 +1385,7 @@ generate_callback("ApeltunFToppeRamme")
 generate_callback("ApeltunS")
 generate_callback("ApeltunVannetRamme")
 generate_callback("ArnaBunn")
+generate_callback("ArnaVerkstedBunn")
 generate_callback("BjoreioBunn")
 generate_callback("BjoreioFlyte")
 generate_callback("BolstadBunnM")
@@ -1424,7 +1456,7 @@ def update_graph(selectedarter,value,prevLayout):
     else: 
         legendfontcol=appcolors['text']
         starcol='#f0dba5'
-    print prevLayout
+    #print prevLayout
     if(prevLayout is not None):
         if ('mapbox.zoom' in prevLayout.keys()):
             #print prevLayout
@@ -1453,7 +1485,12 @@ def update_graph(selectedarter,value,prevLayout):
                     color=groupbyantenna['PIT.ID'],
                     #colorscale='Bluered',
                     #colorscale=[[0,'ffffe0'],[0.1,'ffe6b2'],[0.2,'ffcb91'],[0.3,'ffae79'],[0.4,'fe9061'],[0.5,'f47461'],[0.6,'e75758'],[0.7,'d53c4c'],[0.8,'c0223b'],[0.9,'a70b24'],[1.0,'8b0000']],
+                    ## orange deeppink darkred
                     colorscale = [[0,'ffa500'],[0.1,'ff8f3b'],[0.2,'fc784e'],[0.3,'f64656'],[0.4,'eb5257'],[0.5,'de3f35'],[0.6,'d12e4a'],[0.7,'c01e3d'],[0.8,'b0102e'],[0.9,'9e041b'],[1.0,'8b0000']],
+                    ## white yellow orange deeppink darkred
+                    #colorscale = [[0,'ffffff'],[0.1,'ffec6f'],[0.2,'ffd130'],[0.3,'ffb407'],[0.4,'ff9434'],[0.5,'fa7251'],[0.6,'ec5357'],[0.7,'d9384f'],[0.8,'c21f3e'],[0.9,'a80825'],[1.0,'8b0000']],
+                    ## white,yellow,orange,darkred, indigo
+                    #colorscale = [[0,'#ffffff'],[0.1,'ffffb2'],[0.2,'ffff5b'],[0.3,'ffed00'],[0.4,'ffca00'],[0.5,'ffa500'],[0.6,'d16b01'],[0.7,'a23002'],[0.8,'850020'],[0.9,'720050'],[1.0,'4b0082']],
                     #[[0,"E57100"],[0.1,"E16508"],[0.2,"DD5A10"],[0.3,"D94F19"],[0.4,"D54321"],[0.5,"D2382A"],[0.6,"CE2D32"],[0.7,"CA213A"],[0.8,"#C61643"],[0.9,"C20B4B"],[1.0,"#BF0054"]],
                     #'pairs' | 'Greys' | 'Greens' | 'Bluered' | 'Hot' | 'Picnic' | 'Portland' | 'Jet' | 'RdBu' | 'Blackbody' | 'Earth' | 'Electric' | 'YIOrRd' | 'YIGnBu' 
                     #opacity=0.5,
@@ -1773,7 +1810,7 @@ def update_pitids_table(databasestring,stringwlist):
     [dash.dependencies.Input('database-dropdown-download', 'value'),
      dash.dependencies.Input('pitids-list', 'value')])
 def update_pitid_downloader(databasestring,stringwlist): 
-    print stringwlist.split()
+    #print stringwlist.split()
     if databasestring=='repings database':   
         df = dfformatdatefull
     else:
@@ -1798,11 +1835,13 @@ def update_pitid_downloader(databasestring,stringwlist):
 def update_graph_bydate_p2(selected_arter,selected_column, yaxis_type, retain_data, max_date, min_date):
 
     dfdatefull = get_arter(selected_arter)
+
+    dfdatefull = dfdatefull.sort_values('date')
     
     #--------------------------------------------------------------------------
     # filter to remove duplicated PIT.IDs and retain only the FIRST recording
     if (retain_data!='keep all repings, filter the unique repings by day (the same PIT.ID can show up on multiple dates)'):
-        dfdatefull = dfdatefull.drop_duplicates(subset='PIT.ID', keep="first")
+        dfdatefull = dfdatefull.drop_duplicates(subset=['PIT.ID','Year'], keep="first")
     #---------------------------------------------------------------------------
 
     min_date = pd.to_datetime(min_date)
@@ -1880,11 +1919,13 @@ def update_graph_bydate_p2(selected_arter,selected_column, yaxis_type, retain_da
 def update_graph_countsbyfiels_p2(selectedarter,selectedcol,yaxis_type,retain_data):
 
     mydf = get_arter(selectedarter)
+
+    mydf = mydf.sort_values('date')
    
     #--------------------------------------------------------------------------
     # filter to remove duplicated PIT.IDs and retain only the FIRST recording
     if (retain_data!='keep all repings, filter the unique repings by the chosen field (the same PIT.ID can show up multiple times)'):
-        mydf = mydf.drop_duplicates(subset='PIT.ID', keep="first")
+        mydf = mydf.drop_duplicates(subset=['PIT.ID','Year'], keep="first")
     #---------------------------------------------------------------------------
 
     groupbyselcol = mydf.groupby([selectedcol])['PIT.ID'].agg(lambda x:len(x.unique()))
@@ -1943,10 +1984,12 @@ def update_graph_countsbyantennaname_p2(selectedarter,selectedcol,yaxis_type,ret
 
     mydf = get_arter(selectedarter)
 
+    mydf = mydf.sort_values('date')
+
     #--------------------------------------------------------------------------
     # filter to remove duplicated PIT.IDs and retain only the FIRST recording
     if (retain_data!='keep all repings, filter the unique repings by antenna (the same PIT.ID can show up for more than one antenna)'):
-        mydf = mydf.drop_duplicates(subset='PIT.ID', keep="first")
+        mydf = mydf.drop_duplicates(subset=['PIT.ID','Year'], keep="first")
     #---------------------------------------------------------------------------
 
     unstacked = mydf.groupby(["AntennaName",selectedcol])['PIT.ID'].agg(lambda x:len(x.unique()))
